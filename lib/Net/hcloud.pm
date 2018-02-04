@@ -48,7 +48,9 @@ use LWP::UserAgent ();
 use URI::Escape;
 use JSON::XS;
 use base 'Exporter';
-our @EXPORT=qw(wait_for wait_for_action add_ssh_key add_server do_server_action add_floating_ip do_floating_ip_action);
+our @EXPORT=qw(wait_for wait_for_action add_ssh_key
+find_or_add_server add_server do_server_action
+add_floating_ip do_floating_ip_action);
 
 our $VERSION = 0.21;
 our $debug = $ENV{HCLOUDDEBUG}||0;
@@ -236,6 +238,8 @@ sub add_ssh_key($$)
 
  Deletes the ssh_key
 
+=head2 find_or_add_server($name, $type, $image, {datacenter=>1, ssh_keys=>[1234]})
+
 =head2 add_server($name, $type, $image, {datacenter=>1, ssh_keys=>[1234]})
 
  Create a new server with the last parameter passing optional args
@@ -249,6 +253,14 @@ sub add_server($$$;$)
     my $optionalargs = shift||{};
     my %args=(name=>$name, server_type=>$server_type, image=>$image, %$optionalargs);
     return req_objects("POST", "servers", undef, "server", \%args);
+}
+
+sub find_or_add_server($$$;$)
+{
+    my $name = shift;
+    my $server = get_servers({name=>$name});
+    if ($server && @$server) { return $server->[0] }
+    add_server($name, shift, shift, shift);
 }
 
 =head2 update_server($serverid, {name=>$newname})
