@@ -48,7 +48,7 @@ use LWP::UserAgent ();
 use URI::Escape;
 use JSON::XS;
 use base 'Exporter';
-our @EXPORT=qw(add_ssh_key add_server do_server_action add_floating_ip do_floating_ip_action);
+our @EXPORT=qw(wait_for wait_for_action add_ssh_key add_server do_server_action add_floating_ip do_floating_ip_action);
 
 our $VERSION = 0.21;
 our $debug = $ENV{HCLOUDDEBUG}||0;
@@ -58,6 +58,35 @@ our $UA = LWP::UserAgent->new(requests_redirectable=>[],
     agent=>"https://github.com/bmwiedemann/hcloud-perl $VERSION");
 our $token = `cat ~/.hcloudapitoken`; chomp($token);
 our @configfiles = ("/etc/hcloudrc.pm", "$ENV{HOME}/.hcloudrc.pm");
+
+
+sub wait_for($$$)
+{
+    my($count, $delay, $sub) = @_;
+    for(1..$count) {
+        my $ret = &$sub();
+        return $ret if $ret;
+        sleep($delay);
+    }
+    confess "timed out waiting";
+}
+=head2 wait_for_action($actionid, $maxwait)
+
+ wait for an action to leave running state
+ returns succeeding action object
+ $maxwait defaults to 30 seconds
+
+=cut
+sub wait_for_action($;$)
+{
+    my $actionid = shift;
+    my $maxwait = shift || 30;
+    wait_for($maxwait, 1, sub{
+        my $a = get_action($actionid);
+        return undef if $a->{status} eq "running";
+        return $a;
+    });
+}
 
 sub api_req($$;$)
 {
