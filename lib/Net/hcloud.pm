@@ -111,6 +111,11 @@ sub req_objects($$;$$$)
     my $result = api_req($method, "v1/$object$extra", $request_body);
     my $r = $result->{$targetkey};
     bad_reply($result) unless $r;
+    for my $key (qw(action root_password)) {
+        if(ref($r) eq "HASH" && $targetkey ne $key && exists $result->{$key}) {
+            $r->{$key} ||= $result->{$key};
+        }
+    }
     return $r;
 }
 
