@@ -40,7 +40,7 @@ my $ip = $server->{public_net}->{ipv4}->{ip};
 my $dnsname = "testserver.zq1.de";
 SKIP: {
     skip "already has reverse DNS", 3 if $server->{public_net}->{ipv4}->{dns_ptr} eq $dnsname;
-    my $ptraction = do_server_action($server->{id}, "change_dns_ptr", {
+    my $ptraction = do_server_change_dns_ptr($server->{id}, {
         ip=>$ip,
         dns_ptr=>$dnsname});
     is($ptraction->{command}, "change_dns_ptr", "ptr action returned");
@@ -71,7 +71,7 @@ is($flip->{blocked}, 0, "flip is not blocked");
 my $flipdnsname = "testserverflip.zq1.de";
 SKIP: {
     skip "flip already has reverse DNS", 3 if $flip->{dns_ptr}[0]{dns_ptr} eq $flipdnsname;
-    my $ptraction = do_floating_ip_action($flip->{id}, "change_dns_ptr", {
+    my $ptraction = do_floating_ip_change_dns_ptr($flip->{id}, {
         ip=>$flip->{ip},
         dns_ptr=>$flipdnsname});
     is($ptraction->{command}, "change_dns_ptr", "ptr action returned");
@@ -88,14 +88,14 @@ ping $flip->{ip};
 is($?, 0, "ping flip");
 
 {
-    my $unassignaction = do_floating_ip_action($flip->{id}, "unassign");
+    my $unassignaction = do_floating_ip_unassign($flip->{id});
     my $a = wait_for_action($unassignaction->{id});
     is($a->{status}, "success", "flip unassign has succeeded");
     ping $flip->{ip};
     isnt($?, 0, "cannot ping unassigned flip");
 }
 {
-    my $assignaction = do_floating_ip_action($flip->{id}, "assign", {server=>$server->{id}});
+    my $assignaction = do_floating_ip_assign($flip->{id}, {server=>$server->{id}});
     my $a = wait_for_action($assignaction->{id});
     is($a->{status}, "success", "flip assign has succeeded");
     ping $flip->{ip};

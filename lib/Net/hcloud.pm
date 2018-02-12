@@ -284,6 +284,49 @@ sub do_server_action($$;$)
     return req_objects("POST", "servers/$id/actions/$action", undef, "action", $extra);
 }
 
+for my $o (qw(poweron reboot reset shutdown poweroff reset_password disable_rescue disable_backup detach_iso)) {
+    my $f = "do_server_$o";
+    eval "sub $f(\$) { my \$id=shift; do_server_action(\$id, \"${o}\") }";
+    push(@EXPORT, $f);
+}
+for my $o (qw(enable_rescue create_image rebuild change_type enable_backup attach_iso change_dns_ptr)) {
+    my $f = "do_server_$o";
+    eval "sub $f(\$;\$) { my \$id=shift; do_server_action(\$id, \"${o}\", shift) }";
+    push(@EXPORT, $f);
+}
+
+=head2 do_server_poweron($serverid)
+
+=head2 do_server_reboot($serverid)
+
+=head2 do_server_reset($serverid)
+
+=head2 do_server_shutdown($serverid)
+
+=head2 do_server_poweroff($serverid)
+
+=head2 do_server_reset_password($serverid)
+
+=head2 do_server_enable_rescue($serverid, {ssh_keys=>[$keyid]})
+
+=head2 do_server_disable_rescue($serverid)
+
+=head2 do_server_create_image($serverid, {type=>"snapshot", description=>"foo"})
+
+=head2 do_server_rebuild($serverid, {image=>$imageid})
+
+=head2 do_server_change_type($serverid, {server_type=>"cx21"})
+
+=head2 do_server_enable_backup($serverid, {backup_window=>"02-06"})
+
+=head2 do_server_disable_backup($serverid)
+
+=head2 do_server_attach_iso($serverid, {iso=>"someISOname"})
+
+=head2 do_server_detach_iso($serverid)
+
+=head2 do_server_change_dns_ptr($serverid, {ip=>"1.2.3.4", dns_ptr=>"hostname.fqdn"})
+
 =head2 del_server($serverid)
 
  Deletes the server, losing all its data.
@@ -318,6 +361,18 @@ sub do_floating_ip_action($$;$)
     my $extra = shift;
     return req_objects("POST", "floating_ips/$id/actions/$action", undef, "action", $extra);
 }
+
+for my $o (qw(assign unassign change_dns_ptr)) {
+    my $f = "do_floating_ip_$o";
+    eval "sub $f(\$;\$) { my \$id=shift; do_floating_ip_action(\$id, \"${o}\", shift) }";
+    push(@EXPORT, $f);
+}
+
+=head2 do_floating_ip_assign($floating_ipid, {server=>$serverid})
+
+=head2 do_floating_ip_unassign($floating_ipid)
+
+=head2 do_floating_ip_change_dns_ptr($floating_ipid, {ip=>"1.2.3.4", dns_ptr=>"hostname.fqdn"})
 
 =head2 del_floating_ip($floating_ipid)
 
