@@ -57,6 +57,7 @@ our $UA = LWP::UserAgent->new(requests_redirectable=>[],
     parse_head=>0, timeout=>9,
     agent=>"https://github.com/bmwiedemann/hcloud-perl $VERSION");
 our $token = `cat ~/.hcloudapitoken`; chomp($token);
+our @configfiles = ("/etc/hcloudrc.pm", "$ENV{HOME}/.hcloudrc.pm");
 
 sub api_req($$;$)
 {
@@ -284,6 +285,28 @@ sub do_floating_ip_action($$;$)
 
  Deletes the image.
 
+=head1 ENVIRONMENT
+
+The following environment variables are used by hcloud:
+
+=over
+
+=item HOME
+
+The module will look for .hcloudrc.pm in your home directory.
+
+=item HCLOUDDEBUG
+
+Set to 1 to enable extra verbose output of HTTP queries and responses
+
+=back
+
 =cut
+
+for my $conf (@configfiles) {
+    if(-e $conf) {
+        do $conf or die "could not parse $conf: $@";
+    }
+}
 
 1;

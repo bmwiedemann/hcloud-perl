@@ -39,6 +39,10 @@ use Net::hcloud;
  ~/.hcloudapitoken
  mandatory file - must contain only the API token
 
+ ~/.hcloudrc.pm
+ may contain custom settings for hcloud
+ It is evaluated in the Net::hcloud context
+
  ~/.hcloudcli_history
  will be read on startup and every interactive command is appended.
  User needs to create the file to enable history.
