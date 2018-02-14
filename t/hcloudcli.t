@@ -32,6 +32,6 @@ is(c(".c $hashin", ".r '--'", ".c [$hashin]"), "${hashcsv}--\n$hashcsv", "hash c
 is(c(".s $hashin", ".s [$hashin]"), "$hashshell$hashshell", "arrayref hash shell out");
 is(c(".y $arrayin", ".y [$hashin]"), "---\n- 1\n- foo\n---\n- a: 4\n  b: foo b\n- a: 6\n  b: 1\n", "arrayref hash yaml");
 is(c(".c get 'image', 1, 'name', 'type'"), "ubuntu-16.04\tsystem\n", "get element extraction");
-is(c(".c get 'images', 'id'"), "1\n2\n3\n4\n", "get images and csv array output");
+like(c(".c get 'images', 'id'"), qr/^1\n2\n3\n4\n/, "get images and csv array output");
 #is(c('.raw get_image(1)->{name}'), "ubuntu-16.04\n", "raw image type");
 is(c('(get_images {name=>"debian-9"})->[0]->{id}'), "2\n", "get_images");
