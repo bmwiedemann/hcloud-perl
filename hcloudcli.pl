@@ -36,25 +36,45 @@ sub flatten_hash($)
 	$_[0]->{$_}||""
     } sort keys(%{$_[0]});
 }
+sub flatten($);
+sub flatten($) {
+    my $h = shift;
+    if(ref($h) eq "ARRAY") {
+        for(my $i=$#$h; $i>=0; $i--) {
+            $h->[$i] = flatten($h->[$i]);
+        }
+    }
+    if(ref($h) eq "HASH") {
+        foreach my $k (keys %$h) {
+            if(ref($h->{$k}) eq "HASH" and $h->{$k}->{id}) {
+                $h->{$k} = $h->{$k}->{id};
+            }
+        }
+    }
+    return $h;
+}
+
 sub csvout(@) {
     my @obj = @_;
     if(ref($obj[0]) ne "ARRAY") { @obj = [@obj] }
     if(ref($obj[0]->[0]) eq "HASH") {
-        @obj = map {[flatten_hash($_)]} @{$obj[0]};
+        @obj = map {[flatten_hash(flatten($_))]} @{$obj[0]};
     }
     join("", map {
         join("\t", @$_)."\n"
     } @obj)
 }
 sub shellout(@) {
-    if(ref($_[0]) eq "ARRAY") { $_[0] = $_[0]->[0] }
+    my $o = shift;
+    if(ref($o) eq "ARRAY") { $o = $o->[0] }
+    flatten($o);
     join("",
         map {
-            my $v = $_[0]->{$_}||"";
+            my $v = $o->{$_}||"";
             $v =~ s/["\\]/\\$&/g;
             "$_=\"$v\"\n"
         }
-        (sort keys %{$_[0]}))
+        (sort keys %$o))
 }
 eval {
     require YAML;
