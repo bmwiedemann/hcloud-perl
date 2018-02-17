@@ -132,3 +132,4 @@ my $prompt = "> ";
 while ( defined ($_ = $term->readline($prompt)) ) {
     run_line($_);
 }
+print "exit\n";
