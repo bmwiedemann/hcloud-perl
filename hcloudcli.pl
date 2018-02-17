@@ -76,10 +76,11 @@ sub shellout(@) {
         }
         (sort keys %$o))
 }
-eval {
+sub yamlout(@)
+{
     require YAML;
-    sub yamlout(@) { YAML::Dump(@_) }
-};
+    YAML::Dump(@_);
+}
 
 sub run_line($)
 {
