@@ -39,9 +39,14 @@ use Net::hcloud;
  ~/.hcloudapitoken
  mandatory file - must contain only the API token
 
+ ~/.hcloudcli_history
+ will be read on startup and every interactive command is appended.
+ User needs to create the file to enable history.
+
 =cut
 
 $| = 1;
+our $histfile = "$ENV{HOME}/.hcloudcli_history";
 our $encoder = JSON::XS->new->allow_nonref->pretty->canonical;
 our $defaultoutputformat = "json";
 our %outputformatabbrev = (c=>"csv", j=>"json", r=>"raw", s=>"shell", y=>"yaml");
@@ -166,8 +171,10 @@ sub get($;@)
 my $term = Term::ReadLine->new('hcloud');
 $term->Attribs->{completion_word} = [qw(get help quit), @Net::hcloud::EXPORT];
 $term->Attribs->{'completion_entry_function'} = \&hcloud_completion;
+$term->read_history($histfile);
 my $prompt = "> ";
 while ( defined ($_ = $term->readline($prompt)) ) {
     run_line($_);
+    $term->append_history(1, $histfile);
 }
 print "exit\n";
