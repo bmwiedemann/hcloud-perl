@@ -5,24 +5,41 @@ use Term::ReadLine;
 use lib 'lib';
 use Net::hcloud;
 
-# example usage:
-# ./hcloudcli.pl help
-# ./hcloudcli.pl 'help "add_server"'
-# json obj output (-f json is default):
-# ./hcloudcli.pl 'get_images'
-# ./hcloudcli.pl 'get_images {name=>"debian-9"}'
-# ./hcloudcli.pl 'get_image 1'
-# ./hcloudcli.pl '(get_images {name=>"debian-9"})->[0]->{id}'
-# ./hcloudcli.pl "update_ssh_key 1234, {name=>'foo'}"
-# ./hcloudcli.pl 1+2
-# formatted value output:
-# ./hcloudcli.pl '.raw get_image(1)->{name}'
-# ./hcloudcli.pl -f raw 'get_image(1)->{name}'
-# ./hcloudcli.pl ".c get 'image', 1, 'name', 'type'"
-# ./hcloudcli.pl ".csv get 'images', 'id', 'name'"
-# ./hcloudcli.pl ".shell get 'image', 1"
-# interactive mode:
-# ./hcloudcli.pl
+=head1 NAME
+
+ hcloudcli.pl - the Hetzner Cloud Command Line Interface
+
+=head1 SYNOPIS
+
+ example usage:
+ ./hcloudcli.pl help
+ ./hcloudcli.pl 'help "add_server"'
+
+ json obj output (-f json is default):
+ ./hcloudcli.pl 'get_images'
+ ./hcloudcli.pl 'get_images {name=>"debian-9"}'
+ ./hcloudcli.pl 'get_image 1'
+ ./hcloudcli.pl '(get_images {name=>"debian-9"})->[0]->{id}'
+ ./hcloudcli.pl "update_ssh_key 1234, {name=>'foo'}"
+ ./hcloudcli.pl 1+2
+
+ formatted value output:
+ ./hcloudcli.pl '.raw get_image(1)->{name}'
+ ./hcloudcli.pl -f raw 'get_image(1)->{name}'
+ ./hcloudcli.pl ".c get 'image', 1, 'name', 'type'"
+ ./hcloudcli.pl ".csv get 'images', 'id', 'name'"
+ ./hcloudcli.pl ".shell get 'image', 1"
+ ./hcloudcli.pl ".yaml get_image 1"
+
+ interactive mode:
+ ./hcloudcli.pl
+
+=head1 FILES
+
+ ~/.hcloudapitoken
+ mandatory file - must contain only the API token
+
+=cut
 
 $| = 1;
 our $encoder = JSON::XS->new->allow_nonref->pretty->canonical;
