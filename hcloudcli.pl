@@ -29,6 +29,7 @@ use Net::hcloud;
  ./hcloudcli.pl ".csv get 'images', 'id', 'name'"
  ./hcloudcli.pl ".shell get 'image', 1"
  ./hcloudcli.pl ".yaml get_image 1"
+ ./hcloudcli.pl ".dump get_image 1"
 
  interactive mode:
  ./hcloudcli.pl
@@ -48,7 +49,7 @@ $| = 1;
 our $histfile = "$ENV{HOME}/.hcloudcli_history";
 our $encoder = JSON::XS->new->allow_nonref->pretty->canonical;
 our $defaultoutputformat = "json";
-our %outputformatabbrev = (c=>"csv", j=>"json", r=>"raw", s=>"shell", y=>"yaml");
+our %outputformatabbrev = (c=>"csv", d=>"dump", j=>"json", r=>"raw", s=>"shell", y=>"yaml");
 sub jsonout(@) {$encoder->encode($_[0])}
 sub rawout(@) { @_, "\n" }
 sub flatten_hash($)
@@ -101,6 +102,11 @@ sub yamlout(@)
 {
     require YAML;
     YAML::Dump(@_);
+}
+sub dumpout(@)
+{
+    require Data::Dumper;
+    Data::Dumper::Dumper(@_);
 }
 
 sub run_line($)

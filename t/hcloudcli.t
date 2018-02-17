@@ -1,4 +1,4 @@
-use Test::More tests=>17;
+use Test::More tests=>18;
 
 sub c(@)
 {
@@ -21,6 +21,7 @@ is(c('1+2'), "3\n", "default number out");
 is(c('-f', 'json', '"foo"."bar"'), "\"foobar\"\n", "json string out");
 is(c('.r "foo"."bar"', ".r \@{$arrayin}"), "foobar\n1foo\n", "raw string+array out");
 is(c(".j $arrayin"), "[\n   1,\n   \"foo\"\n]\n", "json out");
+is(c(".d 27"), "\$VAR1 = 27;\n", "dump out");
 is(c('.csv (1, 7, "foo")'), "1\t7\tfoo\n", "csv out");
 is(c('.s [{key=>{id=>23, name=>"foo"}}]'), "key=\"23\"\n", "flatten array");
 is(c('.s {key=>{id=>23, name=>"foo"}}'), "key=\"23\"\n", "flatten hash");
