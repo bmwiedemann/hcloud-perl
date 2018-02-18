@@ -284,14 +284,13 @@ sub do_server_action($$;$)
     return req_objects("POST", "servers/$id/actions/$action", undef, "action", $extra);
 }
 
-for my $o (qw(poweron reboot reset shutdown poweroff reset_password disable_rescue disable_backup detach_iso)) {
+my $param = '$';
+for my $o (qw(poweron reboot reset shutdown poweroff reset_password disable_rescue disable_backup detach_iso
+        __marker_for_extra_param__
+        enable_rescue create_image rebuild change_type enable_backup attach_iso change_dns_ptr)) {
+    if($o eq '__marker_for_extra_param__') { $param = '$;$'; next }
     my $f = "do_server_$o";
-    eval "sub $f(\$) { my \$id=shift; do_server_action(\$id, \"${o}\") }";
-    push(@EXPORT, $f);
-}
-for my $o (qw(enable_rescue create_image rebuild change_type enable_backup attach_iso change_dns_ptr)) {
-    my $f = "do_server_$o";
-    eval "sub $f(\$;\$) { my \$id=shift; do_server_action(\$id, \"${o}\", shift) }";
+    eval "sub $f($param) { my \$id=shift; do_server_action(\$id, \"${o}\", shift) }";
     push(@EXPORT, $f);
 }
 
