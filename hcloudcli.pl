@@ -181,7 +181,7 @@ sub get($;@)
 require Term::ReadLine;
 our $term = Term::ReadLine->new('hcloud');
 our $prompt //= "> ";
-$term->Attribs->{completion_word} = [qw(get help quit), @Net::hcloud::EXPORT];
+$term->Attribs->{completion_word} = [qw(get help quit), map {s/%//; $_} @Net::hcloud::EXPORT];
 $term->Attribs->{'completion_entry_function'} = \&hcloud_completion;
 $term->read_history($histfile);
 while ( defined ($_ = $term->readline($prompt)) ) {

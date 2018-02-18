@@ -50,7 +50,8 @@ use JSON::XS;
 use base 'Exporter';
 our @EXPORT=qw(wait_for wait_for_action add_ssh_key
 find_or_add_server add_server do_server_action
-add_floating_ip do_floating_ip_action);
+add_floating_ip do_floating_ip_action
+%defaultid);
 
 our $VERSION = 0.21;
 our $debug = $ENV{HCLOUDDEBUG}||0;
@@ -60,6 +61,7 @@ our $UA = LWP::UserAgent->new(requests_redirectable=>[],
     agent=>"https://github.com/bmwiedemann/hcloud-perl $VERSION");
 our $token = `cat ~/.hcloudapitoken`; chomp($token);
 our @configfiles = ("/etc/hcloudrc.pm", "$ENV{HOME}/.hcloudrc.pm");
+our %defaultid;
 
 
 sub wait_for($$$)
@@ -196,21 +198,21 @@ for my $o (qw(actions servers floating_ips locations datacenters images isos ser
     if($o =~m/(.*)s$/) {
         my $singular = $1;
         $f = "get_${singular}";
-        eval "sub $f(\$;\$) { get_one_object('${singular}', shift) }";
+        eval "sub $f(;\$\$) { my \$id = shift||\$defaultid{$singular}; get_one_object('${singular}', \$id) }";
         push(@EXPORT, $f);
     }
 }
 for my $o (qw(server floating_ip ssh_key image)) {
     my $f = "del_$o";
-    eval qq!sub $f(\$) { my \$id=shift; confess "missing id" unless \$id; api_req("DELETE", "v1/${o}s/\$id") }!;
+    eval qq!sub $f(;\$) { my \$id=shift||\$defaultid{$o}; confess "missing id" unless \$id; api_req("DELETE", "v1/${o}s/\$id") }!;
     push(@EXPORT, $f);
     $f = "update_$o";
-    eval qq!sub $f(\$\$) { my \$id=shift;  req_one_object("PUT", "${o}", \$id, undef, shift) }!;
+    eval qq!sub $f(\$\$) { my \$id=shift||\$defaultid{$o};  req_one_object("PUT", "${o}", \$id, undef, shift) }!;
     push(@EXPORT, $f);
 }
 for my $o (qw(actions metrics)) {
     my $f = "get_server_$o";
-    eval "sub $f(\$;\$) { my \$id=shift; get_objects(\"servers/\$id/${o}\", shift, '$o') }";
+    eval "sub $f(\$;\$) { my \$id=shift||\$defaultid{server}; get_objects(\"servers/\$id/${o}\", shift, '$o') }";
     push(@EXPORT, $f);
 }
 
