@@ -125,6 +125,7 @@ sub req_one_object($$$;$$)
     my $id = shift;
     my $extra = shift || "";
     my $body = shift;
+    confess "missing id" unless $id;
     req_objects($method, "${object}s/$id", $extra, $object, $body);
 }
 
@@ -163,7 +164,7 @@ for my $o (qw(actions servers floating_ips locations datacenters images isos ser
 }
 for my $o (qw(server floating_ip ssh_key image)) {
     my $f = "del_$o";
-    eval qq!sub $f(\$) { my \$id=shift;  api_req("DELETE", "v1/${o}s/\$id") }!;
+    eval qq!sub $f(\$) { my \$id=shift; confess "missing id" unless \$id; api_req("DELETE", "v1/${o}s/\$id") }!;
     push(@EXPORT, $f);
     $f = "update_$o";
     eval qq!sub $f(\$\$) { my \$id=shift;  req_one_object("PUT", "${o}", \$id, undef, shift) }!;
