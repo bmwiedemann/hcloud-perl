@@ -141,8 +141,9 @@ sub hcloud_completion
 sub help(;$)
 {
     my $search = shift||"";
-    if($search) { $search = "| grep -A3 $search" }
-    system("perldoc Net::hcloud $search")
+    if($search) { $search = "-otext Net::hcloud | grep -B1 -A3 --color=auto $search" }
+    else { $search = "Net::hcloud" }
+    system("perldoc $search")
 }
 sub quit() { exit 0 }
 
