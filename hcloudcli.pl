@@ -1,7 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
 use JSON::XS;
-use Term::ReadLine;
 use lib 'lib';
 use Net::hcloud;
 
@@ -168,6 +167,7 @@ sub get($;@)
     return $obj;
 }
 
+require Term::ReadLine;
 my $term = Term::ReadLine->new('hcloud');
 $term->Attribs->{completion_word} = [qw(get help quit), @Net::hcloud::EXPORT];
 $term->Attribs->{'completion_entry_function'} = \&hcloud_completion;
