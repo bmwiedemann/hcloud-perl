@@ -72,6 +72,7 @@ sub api_req($$;$)
     my $response = $UA->request($request);
     if($debug) {
         print STDERR "Request: $uri\n";
+        print STDERR "Request body: ".$request->content()."\n";
         print STDERR "status: ", $response->code, " ", $response->message, "\n";
         for my $h (qw(Content-Type RateLimit-Limit RateLimit-Remaining RateLimit-Reset)) {
             print STDERR $h, ": ", $response->header($h), "\n";
