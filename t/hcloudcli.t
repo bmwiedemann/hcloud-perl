@@ -1,4 +1,4 @@
-use Test::More tests=>18;
+use Test::More tests=>20;
 
 sub c(@)
 {
@@ -25,6 +25,8 @@ is(c(".d 27"), "\$VAR1 = 27;\n", "dump out");
 is(c('.csv (1, 7, "foo")'), "1\t7\tfoo\n", "csv out");
 is(c('.s [{key=>{id=>23, name=>"foo"}}]'), "key=\"23\"\n", "flatten array");
 is(c('.s {key=>{id=>23, name=>"foo"}}'), "key=\"23\"\n", "flatten hash");
+is(c('.s {key=>{sub1=>23, sub2=>"foo"}}'), "key_sub1=\"23\"\nkey_sub2=\"foo\"\n", "flatten nested hash");
+is(c('.s {key=>{osub=>{sub1=>23, sub2=>"foo"}}}'), "key_osub_sub1=\"23\"\nkey_osub_sub2=\"foo\"\n", "flatten nested nested hash");
 like(c('help'), qr/Bernhard M. Wiedemann.*Create a new server/s, "help");
 like(c('help "add_server"'), qr/Create a new server/, "topic-specific help");
 is(c('-f', 'csv', '(1, 7, "foo")', $arrayin), "1\t7\tfoo\n1\tfoo\n", "-f csv out");

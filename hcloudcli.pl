@@ -65,6 +65,7 @@ sub flatten_hash($)
 sub flatten($);
 sub flatten($) {
     my $h = shift;
+    my $recurse = 0;
     if(ref($h) eq "ARRAY") {
         for(my $i=$#$h; $i>=0; $i--) {
             $h->[$i] = flatten($h->[$i]);
@@ -75,8 +76,16 @@ sub flatten($) {
             if(ref($h->{$k}) eq "HASH" and $h->{$k}->{id}) {
                 $h->{$k} = $h->{$k}->{id};
             }
+            if(ref($h->{$k}) eq "HASH") {
+                foreach my $subkey (keys(%{$h->{$k}})) {
+                    $h->{$k."_".$subkey} = $h->{$k}->{$subkey};
+                }
+                delete $h->{$k};
+                $recurse = 1;
+            }
         }
     }
+    $h = flatten($h) if $recurse;
     return $h;
 }
 
