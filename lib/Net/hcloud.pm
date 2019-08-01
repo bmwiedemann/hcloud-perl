@@ -49,8 +49,8 @@ use URI::Escape;
 use JSON::XS;
 use base 'Exporter';
 our @EXPORT=qw(wait_for wait_for_action add_ssh_key
-find_or_add_server add_server do_server_action
-add_floating_ip do_floating_ip_action);
+find_or_add_server add_server
+add_floating_ip);
 
 our $VERSION = 0.21;
 our $debug = $ENV{HCLOUDDEBUG}||0;
@@ -212,6 +212,9 @@ for my $o (qw(server floating_ip image volume network)) {
     my $f = "get_${o}_actions";
     eval "sub $f(\$;\$) { my \$id=shift; get_objects(\"${o}s/\$id/actions\", shift, 'actions') }";
     push(@EXPORT, $f);
+    $f = "do_${o}_action";
+    eval "sub $f(\$\$;\$) { my \$id=shift; my \$action=shift; req_objects(\"POST\", \"${o}s/\$id/actions/\$action\", undef, 'action', shift) }";
+    push(@EXPORT, $f);
 }
 for my $o (qw(metrics)) {
     my $f = "get_server_$o";
@@ -281,13 +284,6 @@ sub find_or_add_server($$$;$)
  disable_backup attach_iso detach_iso change_dns_ptr
 
 =cut
-sub do_server_action($$;$)
-{
-    my $id = shift;
-    my $action = shift;
-    my $extra = shift;
-    return req_objects("POST", "servers/$id/actions/$action", undef, "action", $extra);
-}
 
 my $param = '$';
 for my $o (qw(poweron reboot reset shutdown poweroff reset_password disable_rescue disable_backup detach_iso
@@ -358,13 +354,6 @@ sub add_floating_ip($)
  assign unassign change_dns_ptr
 
 =cut
-sub do_floating_ip_action($$;$)
-{
-    my $id = shift;
-    my $action = shift;
-    my $extra = shift;
-    return req_objects("POST", "floating_ips/$id/actions/$action", undef, "action", $extra);
-}
 
 for my $o (qw(assign unassign change_dns_ptr)) {
     my $f = "do_floating_ip_$o";
@@ -405,6 +394,19 @@ sub add_volume($$;$)
     return req_objects("POST", "volumes", undef, "volume", \%args);
 }
 
+=head2 do_volume_action($volumeid, $action, {arg=>"value"})
+
+ Do an action with the volume. Possible actions are
+ attach detach resize change_protection
+
+=cut
+
+for my $o (qw(attach detach resize change_protection)) {
+    my $f = "do_volume_$o";
+    eval "sub $f(\$;\$) { my \$id=shift; do_volume_action(\$id, \"${o}\", shift) }";
+    push(@EXPORT, $f);
+}
+
 =head2 del_volume($volumeid)
 
  Deletes the volume.
@@ -426,6 +428,19 @@ sub add_network($$;$)
     my $optionalargs = shift||{};
     my %args=(name=>$name, ip_range=>$iprange, %$optionalargs);
     return req_objects("POST", "networks", undef, "network", \%args);
+}
+
+=head2 do_network_action($networkid, $action, {arg=>"value"})
+
+ Do an action with the network. Possible actions are
+ add_subnet delete_subnet add_route delete_route change_ip_range change_protection
+
+=cut
+
+for my $o (qw(add_subnet delete_subnet add_route delete_route change_ip_range change_protection)) {
+    my $f = "do_network_$o";
+    eval "sub $f(\$;\$) { my \$id=shift; do_network_action(\$id, \"${o}\", shift) }";
+    push(@EXPORT, $f);
 }
 
 =head2 del_network($networkid)
