@@ -61,6 +61,15 @@ our $UA = LWP::UserAgent->new(requests_redirectable=>[],
 our $token = `cat ~/.hcloudapitoken`; chomp($token);
 our @configfiles = ("/etc/hcloudrc.pm", "$ENV{HOME}/.hcloudrc.pm");
 
+our %actions=(
+    floating_ip=>[qw(unassign __marker_for_extra_param__ assign change_dns_ptr change_protection)],
+    image=>[qw(__marker_for_extra_param__ change_protection)],
+    network=>[qw(__marker_for_extra_param__ add_subnet delete_subnet add_route delete_route change_ip_range change_protection)],
+    server=>[qw(poweron reboot reset shutdown poweroff reset_password disable_rescue disable_backup detach_iso
+        __marker_for_extra_param__
+        enable_rescue create_image rebuild change_type enable_backup attach_iso change_dns_ptr)],
+    volume=>[qw(detach __marker_for_extra_param__ attach resize change_protection)],
+);
 
 sub wait_for($$$)
 {
@@ -285,14 +294,14 @@ sub find_or_add_server($$$;$)
 
 =cut
 
+for my $obj (qw(server)) {
 my $param = '$';
-for my $o (qw(poweron reboot reset shutdown poweroff reset_password disable_rescue disable_backup detach_iso
-        __marker_for_extra_param__
-        enable_rescue create_image rebuild change_type enable_backup attach_iso change_dns_ptr)) {
+for my $o (@{$actions{$obj}}) {
     if($o eq '__marker_for_extra_param__') { $param = '$;$'; next }
-    my $f = "do_server_$o";
-    eval "sub $f($param) { my \$id=shift; do_server_action(\$id, \"${o}\", shift) }";
+    my $f = "do_${obj}_$o";
+    eval "sub $f($param) { my \$id=shift; do_${obj}_action(\$id, \"${o}\", shift) }";
     push(@EXPORT, $f);
+}
 }
 
 =head2 do_server_poweron($serverid)
