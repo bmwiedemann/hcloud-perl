@@ -22,10 +22,10 @@ sub ssh($$)
 }
 
 my $keyid = $::keyid or BAIL_OUT('need to set $::keyid in ~/.hcloudrc.pm');
-my $server = find_or_add_server("testserver", "cx11", "debian-9", {datacenter=>1, ssh_keys=>[$keyid]});
+my $server = find_or_add_server("testserver", "cx11", "debian-10", {datacenter=>2, ssh_keys=>[$keyid]});
 is($server->{name}, "testserver", "add_server") or BAIL_OUT("server could not be found or created");
 {
-    my $server2 = find_or_add_server("testserver", "cx11", "debian-9", {datacenter=>1, ssh_keys=>[$keyid]});
+    my $server2 = find_or_add_server("testserver", "cx11", "debian-10", {datacenter=>2, ssh_keys=>[$keyid]});
     is($server->{id}, $server2->{id}, "found server");
 }
 SKIP: {
