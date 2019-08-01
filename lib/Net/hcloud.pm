@@ -29,7 +29,7 @@ Net::hcloud - access Hetzner cloud services API
 
  currently it knows about these objects:
  actions servers floating_ips locations datacenters images isos
- server_types ssh_keys pricing
+ server_types ssh_keys volumes networks pricing
 
  See https://docs.hetzner.cloud/ for which data fields are returned.
 
@@ -189,7 +189,7 @@ sub get_one_object($$;$)
  Get numbers about resource usage
 
 =cut
-for my $o (qw(actions servers floating_ips locations datacenters images isos server_types ssh_keys pricing)) {
+for my $o (qw(actions servers floating_ips locations datacenters images isos server_types ssh_keys volumes networks pricing)) {
     my $f = "get_${o}";
     eval "sub $f(;\$) { get_objects('${o}', shift) }";
     push(@EXPORT, $f);
@@ -200,7 +200,7 @@ for my $o (qw(actions servers floating_ips locations datacenters images isos ser
         push(@EXPORT, $f);
     }
 }
-for my $o (qw(server floating_ip ssh_key image)) {
+for my $o (qw(server floating_ip ssh_key image volume network)) {
     my $f = "del_$o";
     eval qq!sub $f(\$) { my \$id=shift; confess "missing id" unless \$id; api_req("DELETE", "v1/${o}s/\$id") }!;
     push(@EXPORT, $f);
@@ -208,7 +208,12 @@ for my $o (qw(server floating_ip ssh_key image)) {
     eval qq!sub $f(\$\$) { my \$id=shift;  req_one_object("PUT", "${o}", \$id, undef, shift) }!;
     push(@EXPORT, $f);
 }
-for my $o (qw(actions metrics)) {
+for my $o (qw(server floating_ip image volume network)) {
+    my $f = "get_${o}_actions";
+    eval "sub $f(\$;\$) { my \$id=shift; get_objects(\"${o}s/\$id/actions\", shift, 'actions') }";
+    push(@EXPORT, $f);
+}
+for my $o (qw(metrics)) {
     my $f = "get_server_$o";
     eval "sub $f(\$;\$) { my \$id=shift; get_objects(\"servers/\$id/${o}\", shift, '$o') }";
     push(@EXPORT, $f);
@@ -385,6 +390,54 @@ for my $o (qw(assign unassign change_dns_ptr)) {
 =head2 del_image($imageid)
 
  Deletes the image.
+
+=head2 add_volume($name, $size, {location=>1, server=>1234, labels=>["foo"], automount=>1})
+
+ Create a new volume with the last parameter passing optional args
+
+=cut
+sub add_volume($$;$)
+{
+    my $name = shift;
+    my $size = shift;
+    my $optionalargs = shift||{};
+    my %args=(name=>$name, size=>$size, %$optionalargs);
+    return req_objects("POST", "volumes", undef, "volume", \%args);
+}
+
+=head2 del_volume($volumeid)
+
+ Deletes the volume.
+
+=head2 update_volume($volumeid, {name=>'foo', labels=>["bar"]})
+
+ Changes the name or labels of a volume
+ Returns the new object
+
+=head2 add_network($name, $iprange, {labels=>["foo=bar"], subnets=>[{type=>"server", ip_range=>"10.0.1.0/24", network_zone=>"eu-central"}], routes=>[{destination=>"10.100.1.0/24", gateway=>"10.0.1.1"]})
+
+ Create a new network with the last parameter passing optional args
+
+=cut
+sub add_network($$;$)
+{
+    my $name = shift;
+    my $iprange = shift;
+    my $optionalargs = shift||{};
+    my %args=(name=>$name, ip_range=>$iprange, %$optionalargs);
+    return req_objects("POST", "networks", undef, "network", \%args);
+}
+
+=head2 del_network($networkid)
+
+ Deletes the network.
+
+=head2 update_network($networkid, {name=>'foo', labels=>["bar"]})
+
+ Changes the name or labels of a network
+ Returns the new object
+
+
 
 =head1 ENVIRONMENT
 
