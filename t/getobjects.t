@@ -25,4 +25,4 @@ my $pricing = get_pricing();
 is($pricing->{currency}, "EUR", "get_pricing");
 
 my $dc = get_datacenters();
-is($dc->[0]->{name}, "fsn1-dc8", "get_datacenters");
+is($dc->[0]->{name}, "nbg1-dc3", "get_datacenters");

@@ -35,6 +35,6 @@ is(c(".y $arrayin", ".y [$hashin]"), "---\n- 1\n- foo\n---\n- a: 4\n  b: foo b\n
 SKIP: {
     skip "no online tests possible", 3 unless -e "$ENV{HOME}/.hcloudapitoken" && system("ping -q -c 1 -W 1 api.hetzner.cloud >/dev/null")==0;
     is(c(".c get 'image', 1, 'name', 'type'"), "ubuntu-16.04\tsystem\n", "get element extraction");
-    like(c(".c get 'images', 'id'"), qr/^1\n2\n3\n4\n/, "get images and csv array output");
+    like(c(".c get 'images', 'id'"), qr/^1\n2\n3\n/, "get images and csv array output");
     is(c('(get_images {name=>"debian-9"})->[0]->{id}'), "2\n", "get_images");
 }
